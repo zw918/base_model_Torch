@@ -4,6 +4,11 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import transforms
+
+# device  select GPU or CPU
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
 # dataset load
 
     # classify
@@ -48,9 +53,11 @@ class Module(nn.Module):
 # create a model
 model = Module()
 
+model.to(device)
+
 # loss and optim
 criterion = nn.CrossEntropyLoss()
-
+criterion.to(device)
 optimizer = optim.SGD(params=model.parameters(), lr=0.01)
 
 # epoch
@@ -60,6 +67,10 @@ for epoch in range(epochs):
     idx = 0
     for image, labels in train_loader:
         model.train()
+
+        image = image.to(device)
+        labels = labels.to(device)
+
         outputs = model(image)
         loss = criterion(outputs, labels)
         # optimization the weight
@@ -74,6 +85,8 @@ for epoch in range(epochs):
     with torch.no_grad():
         model.eval()
         for image, labels in test_loader:
+            image = image.to(device)            
+            labels = labels.to(device) 
             outputs = model(image)
             loss = criterion(outputs, labels)
             total_loss += loss.item()
